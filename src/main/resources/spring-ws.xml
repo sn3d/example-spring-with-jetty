@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans
+	xmlns="http://www.springframework.org/schema/integration"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:oxm="http://www.springframework.org/schema/oxm"
+	xmlns:int-ws="http://www.springframework.org/schema/integration/ws"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+      http://www.springframework.org/schema/integration
+      http://www.springframework.org/schema/integration/spring-integration-3.0.xsd
+      http://www.springframework.org/schema/integration/ws
+      http://www.springframework.org/schema/integration/ws/spring-integration-ws-3.0.xsd
+      http://www.springframework.org/schema/oxm
+      http://www.springframework.org/schema/oxm/spring-oxm-3.2.xsd">
+
+	<!--
+		This file contains Webservice configuration, endpoint mapping, marshalling, and
+		inbound gateway that publish all incoming SOAP messages into input-channel.
+	-->
+	<beans:bean class="org.springframework.ws.server.endpoint.mapping.UriEndpointMapping">
+		<beans:property name="defaultEndpoint" ref="ws-inbound-gateway"/>
+		<beans:property name="mappings">
+			<beans:props>
+				<beans:prop key="/ws">ws-inbound-gateway</beans:prop>
+			</beans:props>
+		</beans:property>
+	</beans:bean>
+
+	<oxm:jaxb2-marshaller id="marshaller"
+						  contextPath="org.zdevra.examples.jettyexample.ws"/>
+
+	<int-ws:inbound-gateway id="ws-inbound-gateway"
+							request-channel="input-channel"
+							reply-channel="output-channel"
+							marshaller="marshaller"
+							unmarshaller="marshaller"/>
+</beans:beans>

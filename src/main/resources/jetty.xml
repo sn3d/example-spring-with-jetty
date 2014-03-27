@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:p="http://www.springframework.org/schema/p"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!--
+		This file contains configuration of JETTY 9.x server with
+		all servlet dispatchers etc.
+	-->
+	<bean id="server" name="Main" class="org.eclipse.jetty.server.Server" init-method="start" destroy-method="stop">
+		<constructor-arg>
+			<bean id="threadPool" class="org.eclipse.jetty.util.thread.QueuedThreadPool">
+				<property name="minThreads" value="10"/>
+				<property name="maxThreads" value="50"/>
+			</bean>
+		</constructor-arg>
+		<property name="connectors">
+			<list>
+				<bean id="connector" class="org.eclipse.jetty.server.ServerConnector">
+					<constructor-arg ref="server"/>
+					<property name="port" value="9080"/>
+				</bean>
+			</list>
+		</property>
+		<property name="handler">
+			<bean id="handlers" class="org.eclipse.jetty.server.handler.HandlerCollection">
+				<property name="handlers">
+					<list>
+						<bean class="org.zdevra.examples.jettyexample.jetty.EmbeddedJettyServletContextHandler">
+							<property name="contextPath" value="/example"/>
+							<property name="sessionHandler">
+								<bean class="org.eclipse.jetty.server.session.SessionHandler" />
+							</property>
+							<property name="servletHandler">
+								<bean class="org.eclipse.jetty.servlet.ServletHandler">
+									<property name="servlets">
+										<list>
+											<bean class="org.eclipse.jetty.servlet.ServletHolder" p:name="spring-ws">
+												<property name="servlet">
+													<bean class="org.springframework.ws.transport.http.MessageDispatcherServlet" />
+												</property>
+												<property name="initParameters">
+													<map>
+														<entry key="contextConfigLocation" value="classpath:/spring-ws.xml" />
+													</map>
+												</property>
+											</bean>
+										</list>
+									</property>
+									<property name="servletMappings">
+										<list>
+											<bean class="org.eclipse.jetty.servlet.ServletMapping" p:servletName="spring-ws" p:pathSpec="/ws" />
+										</list>
+									</property>
+								</bean>
+							</property>
+						</bean>
+						<bean id="defaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>
+					</list>
+				</property>
+			</bean>
+		</property>
+	</bean>
+</beans>
